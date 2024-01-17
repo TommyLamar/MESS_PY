@@ -1,5 +1,5 @@
 from Task import *
-
+##import rospy #comment out for development on windows since rospy is linux only
 
 class TaskHandler:
     task = Task(-1.23, "changeMe", "changeMe", "changeMe")

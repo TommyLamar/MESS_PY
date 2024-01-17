@@ -8,3 +8,7 @@ class UAV(Vehicle):
     def __init__(self, topic, id, sensors):
         super().__init__(id, sensors)
         self.rosTopicPath = topic
+
+    def getTopic(self):
+        return self.rosTopicPath
+

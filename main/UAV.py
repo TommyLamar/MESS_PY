@@ -8,3 +8,7 @@ class UAV(Vehicle):
     def __init__(self, ip, id, sensors):
         super().__init__(id, sensors)
         self.ip = ip
+
+
+    def getIP(self):
+        return self.ip
