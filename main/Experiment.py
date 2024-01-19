@@ -1,7 +1,6 @@
-from Sensor import *
-from ObstacleMap import *
-from Mission import *
-from Vehicle import *
+from main.ObstacleMap import *
+from main.Mission import *
+
 
 
 class Experiment:
@@ -19,11 +18,20 @@ class Experiment:
     def getMission(self):
         return self.mission
 
+    def addVehicle(self, v):
+        vm = VehicleMission(v, [])
+        if not self.mission.checkDuplicates(vm):
+            self.mission.addVehicleMission(vm)
+            self.vehicles.append(v)
+
     def getVehicles(self):
         return self.vehicles
 
     def getEnvironmentSensors(self):
-        return self.environmentSensors()
+        return self.environmentSensors
+
+    def addEnvironmentSensors(self, s):
+        self.environmentSensors.append(s)
 
     def getMap(self):
         return self.map
