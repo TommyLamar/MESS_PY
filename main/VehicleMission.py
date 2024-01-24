@@ -10,8 +10,11 @@ class VehicleMission:
         self.vehicle = vehicle
         self.tasks = tasks
 
-    def addTask(self, time, message, topic, type):
+    def createTask(self, time, message, topic, type):
         self.tasks.append(Task(time, message, topic, type))
+
+    def addTask(self, t):
+        self.tasks.append(t)
 
     def getVehicle(self):
         return self.vehicle

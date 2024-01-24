@@ -20,7 +20,7 @@ class Mission:
 
         # vehicle if to remove
         v = vm.getVehicle().getViconID()
-        print(v)
+
 
         # Filter to keep vms that don't have the needed
         newVms = [x for x in self.getVehicleMissions() if x.getVehicle().getViconID() != v]
@@ -50,12 +50,41 @@ class Mission:
 
         unsorted = []
         for vm in self.vehicleMissions:
+            vehicle = vm.getVehicle()
             for task in vm.getTasks():
-                unsorted.append(task)
+                t = Temp(vehicle, task)
+                unsorted.append(t)
 
         # sort the list based on the timestamps
-        unsorted.sort(key=lambda x: x.getTimeStamp())
+        unsorted.sort(key=lambda x: x.getTask().getTimeStamp())
 
-        # update MasterTasks attribute and return it
-        self.masterTasks = unsorted
-        return self.getMasterTasks()
+        # create a list of just the tasks
+        onlyTasks = []
+        for obj in unsorted:
+            onlyTasks.append(obj.getTask())
+
+        # update that
+        self.masterTasks = onlyTasks
+
+        # return list of tasks and their associated
+        print(unsorted)
+        return unsorted
+
+    def addTask(self, t, v):
+        vID = v.getViconID()
+        for vm in self.vehicleMissions:
+            if vID == vm.getVehicle().getViconID():
+                vm.addTask(t)
+
+
+class Temp:
+
+    def __init__(self, v, t):
+        self.vehicle = v
+        self.task = t
+
+    def getVehicle(self):
+        return self.vehicle
+
+    def getTask(self):
+        return self.task

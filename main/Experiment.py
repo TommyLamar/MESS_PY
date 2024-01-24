@@ -30,8 +30,13 @@ class Experiment:
     def getEnvironmentSensors(self):
         return self.environmentSensors
 
-    def addEnvironmentSensors(self, s):
-        self.environmentSensors.append(s)
+    def addEnvironmentSensors(self, sensor):
+        self.environmentSensors.append(sensor)
+
+    def addVehicleSensor(self, sensor, vehicle):
+        for v in self.vehicles:
+            if v.getViconID == vehicle.getViconID():
+                v.addSensor(sensor)
 
     def getMap(self):
         return self.map
@@ -40,4 +45,10 @@ class Experiment:
         # To Do
         # returns all sensors in an expirement, both environmental and vehicle
         return []
+
+    def compile(self):
+        return self.mission.generateMasterTasks()
+
+    def addTask(self, t, v):
+        self.mission.addTask(t, v)
 

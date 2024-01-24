@@ -1,6 +1,7 @@
 # The Modular Experimental Software System
 # Created as part of a Major Qualifying Project at Worcester Polytechnic Institute
 # This totally isn't an RBE project
+# I dream of one day refactoring this so all the window classes will be their own file
 
 from main.Experiment import *
 
@@ -85,6 +86,8 @@ class ExperimentWindow(tk.Toplevel):
     def __init__(self, *args, name, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.name = name
+
         self.config(width=400, height=300)
         self.title(name)
 
@@ -98,7 +101,7 @@ class ExperimentWindow(tk.Toplevel):
         self.addTaskButton = tk.Button(self, text="Add Task", command=self.request_task)
         self.addTaskButton.place(x=20, y=150, width=150)
 
-        self.addCompileMission = tk.Button(self, text="Compile Mission")
+        self.addCompileMission = tk.Button(self, text="Compile Mission", command=self.request_compile)
         self.addCompileMission.place(x=50, y=200, width=300)
 
         self.focus()
@@ -108,12 +111,17 @@ class ExperimentWindow(tk.Toplevel):
         self.grab_release()
         self.window_name = AddVehicleInput(callback=self.vehicleInfo)
 
-
     def request_sensor(self):
+        self.grab_release()
         self.window_name2 = AddSensorInput(callback=self.sensorInfo)
 
     def request_task(self):
+        self.grab_release()
         self.window_name3 = AddTaskInput(callback=self.taskInfo)
+
+    def request_compile(self):
+        self.grab_release()
+        self.window_name4 = MissionWindow(name=self.name)
 
     def vehicleInfo(self, name, id):
         self.grab_set()
@@ -123,15 +131,24 @@ class ExperimentWindow(tk.Toplevel):
                 and name):
             mainExperiment.addVehicle(v)
             vehicleDict[name] = v
+            v.setName(name)
         else:
             print("Vehicle already in this experiment")
             # can turn this into a popup window later
 
-    def sensorInfo(self, info):
-        one = 1  # place holder
+    def sensorInfo(self, package, rate, vehicle):
+        self.grab_set()
+        sensor = Sensor(package, rate)
+        if vehicle == "Environmental":
+            mainExperiment.addEnvironmentSensors(sensor)
+        elif vehicle in vehicleDict:
+            mainExperiment.addVehicleSensor(sensor, vehicleDict.get(vehicle))
 
-    def taskInfo(self, info):
-        one = 1  # place holder
+
+    def taskInfo(self, timeStamp, message, topic, vehicle):
+        self.grab_set()
+        t = Task(timeStamp, message, topic, "")
+        mainExperiment.addTask(t, vehicle)
 
 
 # Window that pops up to add a vehicle to an experiment
@@ -185,10 +202,10 @@ class AddSensorInput(tk.Toplevel):
         options = self.loadOptions()
 
         # setup for drop down menu
-        default = tk.StringVar()
-        default.set(options[0])
+        self.selected = tk.StringVar()
+        self.selected.set(options[0])
 
-        self.drop = tk.OptionMenu(self, default, *options)
+        self.drop = tk.OptionMenu(self, self.selected, *options)
         self.drop.place(x=150, y=10)
 
         self.label_drop = tk.Label(self, text="Sensor Location:")
@@ -212,17 +229,23 @@ class AddSensorInput(tk.Toplevel):
         self.doneButton = tk.Button(self, text="Done", command=self.done_pressed)
         self.doneButton.place(x=20, y=150, width=260)
 
+        self.package = ""
+
         self.focus()
 
     def done_pressed(self):
+        rr = self.refreshRateEntry.get()
+        p = self.package
+        vehicle = self.selected.get()
         # Use callback function to return to main window
-        self.callback(info=1)
+        self.callback(rr, p, vehicle)
 
         # kill this window
         self.destroy()
 
     def select_file_pressed(self):
         name = fd.askopenfilename()
+        self.package = name
         self.label_file.config(text=name)
         print(name)
         # need to actually process this into a usable format for the script
@@ -239,9 +262,22 @@ class AddTaskInput(tk.Toplevel):
     def __init__(self, *args, callback=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.callback = callback
-        self.config(width=300, height=200)
+        self.config(width=300, height=300)
         self.resizable(False, False)
         self.title("Vehicle Information")
+
+        # get options for drop down menu
+        options = self.loadOptions()
+
+        # setup for drop down menu
+        self.selected = tk.StringVar()
+        self.selected.set(options[0])
+
+        self.drop = tk.OptionMenu(self, self.selected, *options)
+        self.drop.place(x=150, y=150)
+
+        self.label_drop = tk.Label(self, text="Vehicle:")
+        self.label_drop.place(x=50, y=150)
 
         # set up features
         self.timeStampEntry = tk.Entry(self)
@@ -263,14 +299,65 @@ class AddTaskInput(tk.Toplevel):
         self.label_topic.place(x=50, y=100)
 
         self.doneButton = tk.Button(self, text="Done", command=self.done_pressed)
-        self.doneButton.place(x=20, y=150, width=260)
+        self.doneButton.place(x=20, y=200, width=260)
 
     def done_pressed(self):
         # Use callback function to return to main window
-        self.callback(1)
+        timeStamp = float(self.timeStampEntry.get())
+        message = self.messageEntry.get()
+        topic = self.topicEntry.get()
+        vehicle = vehicleDict.get(self.selected.get())
+
+        self.callback(timeStamp, message, topic, vehicle)
 
         # kill this window
         self.destroy()
+
+    def loadOptions(self):
+        out = ["Don't Select Me"]
+        for key in vehicleDict.keys():
+            out.append(key)
+        return out
+
+
+class MissionWindow(tk.Toplevel):
+    def __init__(self, *args, name, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.config(width=600, height=300)
+        title = name + "- Mission Overview"
+        self.title(title)
+
+        # screen elements
+        bar = tk.Scrollbar(self)
+        text = tk.Text(self, height=10, width=60)
+        text.place(x=20, y=20)
+        bar.place(x=510, y=20, height=200)
+        bar.config(command=text.yview)
+        text.config(yscrollcommand=bar.set)
+
+        for s in self.loadTasks():
+            text.insert(tk.END, s)
+
+    def loadTasks(self):
+        # This is wildly inefficient in terms of running time and could be simplified if we just give the vehicle object
+        # An attribute for the vehicle name, would also save the vehicle dictionary shenanigans, but im too far in to
+        # Want to change that at this moment
+
+        out = ["Time\t Vehicle\t\t Topic\t\t Message\n"]
+        tasks = mainExperiment.compile()
+
+        for obj in tasks:
+            task = obj.getTask()
+            time = str(task.getTimeStamp())
+            topic = str(task.getTopic())
+            message = str(task.getMessage())
+            vehicle = obj.getVehicle()
+            vehicleName = vehicle.getName()
+            string = time + "\t" + vehicleName + "\t\t" + topic + "\t\t" + message + "\n"
+            out.append(string)
+
+        return out
+
 
 
 if __name__ == '__main__':
