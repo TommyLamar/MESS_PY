@@ -6,8 +6,8 @@ https://imgur.com/a/tH3ZLYP
 -------------------------------------------------------
 MESS was developed using Python 3.8
 
-Packages to install:
+Packages to install: \n
 pip install roslibpy
 
-For Linux, tkinter not avaible by default 
+For Linux, tkinter not avaible by default: \n 
 sudo apt-get install python3-tk
