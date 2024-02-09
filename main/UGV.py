@@ -1,5 +1,6 @@
 # This may get deleted now that uavs are using ros
 from Vehicle import *
+import json
 
 
 class UAV(Vehicle):
@@ -12,3 +13,8 @@ class UAV(Vehicle):
     def getTopic(self):
         return self.rosTopicPath
 
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, indent=4)
+
+    def fromJSON(self):
+        return self

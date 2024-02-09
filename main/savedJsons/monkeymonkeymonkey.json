@@ -1,0 +1,16 @@
+{
+    "mission": {
+        "vehicleMissions": []
+    },
+    "vehicles": [],
+    "environmentSensors": [],
+    "map": {
+        "coords": [
+            [
+                0
+            ]
+        ],
+        "rows": 1,
+        "cols": 1
+    }
+}

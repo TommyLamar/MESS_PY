@@ -1,0 +1,16 @@
+{
+    "viconID": 1,
+    "sensors": [
+        {
+            "rosPackage": "s1",
+            "refreshRate": 10,
+            "name": ""
+        },
+        {
+            "rosPackage": "s2",
+            "refreshRate": 20,
+            "name": ""
+        }
+    ],
+    "name": "monkey"
+}

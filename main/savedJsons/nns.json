@@ -1,0 +1,32 @@
+{
+    "mission": {
+        "vehicleMissions": [
+            {
+                "vehicle": {
+                    "viconID": "1",
+                    "sensors": [],
+                    "name": "1"
+                },
+                "tasks": []
+            }
+        ],
+        "masterTasks": []
+    },
+    "vehicles": [
+        {
+            "viconID": "1",
+            "sensors": [],
+            "name": "1"
+        }
+    ],
+    "environmentSensors": [],
+    "map": {
+        "coords": [
+            [
+                0
+            ]
+        ],
+        "rows": 1,
+        "cols": 1
+    }
+}

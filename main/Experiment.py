@@ -1,5 +1,6 @@
 from main.ObstacleMap import *
 from main.Mission import *
+import json
 
 
 
@@ -35,7 +36,7 @@ class Experiment:
 
     def addVehicleSensor(self, sensor, vehicle):
         for v in self.vehicles:
-            if v.getViconID == vehicle.getViconID():
+            if v.getViconID() == vehicle.getViconID():
                 v.addSensor(sensor)
 
     def getMap(self):
@@ -43,12 +44,36 @@ class Experiment:
 
     def getAllSensors(self):
         # To Do
-        # returns all sensors in an expirement, both environmental and vehicle
-        return []
+        out = []
+        for s in self.environmentSensors:
+            out.append(["Environmental", s])
+        for vm in self.mission.getVehicleMissions():
+            v = vm.getVehicle()
+            vname = v.getName()
+            for s in v.getSensors():
+                out.append([vname, s])
+        return out
 
     def compile(self):
         return self.mission.generateMasterTasks()
 
     def addTask(self, t, v):
         self.mission.addTask(t, v)
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, indent=4)
+
+    def fromJSON(self, jsonData):
+        self.vehicles = []
+        self.environmentSensors = []
+        self.mission = self.mission.fromJSON(jsonData['mission'])
+        for vehicle in jsonData['vehicles']:
+            v = Vehicle(-1, [])
+            self.vehicles.append(v.fromJSON(vehicle))
+        for es in jsonData['environmentSensors']:
+            s = Sensor("", 1)
+            self.environmentSensors.append(s.fromJSON(es))
+
+        return self
+
 

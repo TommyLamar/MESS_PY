@@ -1,5 +1,5 @@
 # Obstacle Map
-
+import json
 
 class ObstacleMap:
     def __init__(self, rows, cols):
@@ -20,3 +20,12 @@ class ObstacleMap:
         except IndexError:
             print("error: coordinate out of bounds of obstacle map")
             raise
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, indent=4)
+
+    def fromJSON(self, data):
+        self.coords = data["coords"]
+        self.rows = data["rows"]
+        self.cols = data["cols"]
+        return self

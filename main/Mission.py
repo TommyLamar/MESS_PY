@@ -1,3 +1,4 @@
+import json
 from main.VehicleMission import *
 
 
@@ -20,7 +21,6 @@ class Mission:
 
         # vehicle if to remove
         v = vm.getVehicle().getViconID()
-
 
         # Filter to keep vms that don't have the needed
         newVms = [x for x in self.getVehicleMissions() if x.getVehicle().getViconID() != v]
@@ -76,6 +76,19 @@ class Mission:
             if vID == vm.getVehicle().getViconID():
                 vm.addTask(t)
 
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, indent=4)
+
+    def fromJSON(self, data):
+        self.vehicleMissions = []
+        self.masterTasks = []
+        for vm in data['vehicleMissions']:
+            vmis = VehicleMission([], [])
+            vmis.fromJSON(vm)
+            self.vehicleMissions.append(vmis)
+
+        self.generateMasterTasks()
+        return self
 
 class Temp:
 

@@ -7,10 +7,12 @@ from main.Experiment import *
 
 import tkinter as tk
 from tkinter import filedialog as fd
+import json
 
 # Global Variable to hold the experiment being worked on
 mainExperiment = Experiment(Mission([]), [], [], ObstacleMap(1, 1))
 vehicleDict = {}
+expName = [""]
 
 
 # This is the window seen at startup
@@ -24,7 +26,7 @@ class MainWindow(tk.Tk):
         self.newExpButton = tk.Button(self, text='New Experiment', width=25, command=self.request_name)
         self.newExpButton.pack(pady=10)
 
-        self.openExpButton = tk.Button(self, text='Open Existing Experiment', width=25)
+        self.openExpButton = tk.Button(self, text='Open Existing Experiment', width=25, command=self.select_file_pressed)
         self.openExpButton.pack(pady=10)
 
         self.exitButton = tk.Button(self, text='Exit', width=25, command=self.destroy)
@@ -37,13 +39,33 @@ class MainWindow(tk.Tk):
     def request_name(self):
         self.window_name = ExpInputWindow(callback=self.name_entered)
 
-    # Using the input from new experiment input window
     def name_entered(self, name):
         # update the text at the bottom of the home screen
         self.label_name.config(text=name)
-
         # launch the experiment window
         self.ExpWindow = ExperimentWindow(name=name)
+        expName[0] = name
+
+        # Using the input from new experiment input window
+
+    def select_file_pressed(self):
+        name = fd.askopenfilename()
+        if name[-5:] == ".json": ##only open json files
+            ss = name.split('/')
+            stripName = ss[0][:-4] ##remove the .json from the file name
+            self.label_name.config(text=stripName)
+            with open(name, "r") as file:
+                data = json.load(file)
+                mainExperiment.fromJSON(data)
+                expName[0] = stripName
+            print(expName[0])
+
+            ##update the vehicle dictionary
+            vehicleDict.clear()
+            for v in mainExperiment.getVehicles():
+                vehicleDict[v.getName()] = v
+
+            self.ExpWindow = ExperimentWindow(name=stripName)
 
 
 # Popup window to get new experiment name
@@ -98,11 +120,20 @@ class ExperimentWindow(tk.Toplevel):
         self.addSensorButton = tk.Button(self, text="Add Sensor", command=self.request_sensor)
         self.addSensorButton.place(x=20, y=100, width=150)
 
+        self.addVehicleButton = tk.Button(self, text="View Vehicles", command=self.request_view_vehicles)
+        self.addVehicleButton.place(x=200, y=50, width=150)
+
+        self.addSensorButton = tk.Button(self, text="View Sensors", command=self.request_view_sensors)
+        self.addSensorButton.place(x=200, y=100, width=150)
+
         self.addTaskButton = tk.Button(self, text="Add Task", command=self.request_task)
         self.addTaskButton.place(x=20, y=150, width=150)
 
         self.addCompileMission = tk.Button(self, text="Compile Mission", command=self.request_compile)
         self.addCompileMission.place(x=50, y=200, width=300)
+
+        self.addSaveMission = tk.Button(self, text="Save Mission", command=self.request_save)
+        self.addSaveMission.place(x=50, y=250, width=300)
 
         self.focus()
         self.grab_set()
@@ -111,9 +142,17 @@ class ExperimentWindow(tk.Toplevel):
         self.grab_release()
         self.window_name = AddVehicleInput(callback=self.vehicleInfo)
 
+    def request_view_vehicles(self):
+        self.grab_release()
+        self.window_name5 = ViewVehicleWindow(name=self.name)
+
     def request_sensor(self):
         self.grab_release()
         self.window_name2 = AddSensorInput(callback=self.sensorInfo)
+
+    def request_view_sensors(self):
+        self.grab_release()
+        self.window_name6 = SensorWindow(name=self.name)
 
     def request_task(self):
         self.grab_release()
@@ -122,6 +161,14 @@ class ExperimentWindow(tk.Toplevel):
     def request_compile(self):
         self.grab_release()
         self.window_name4 = MissionWindow(name=self.name)
+
+    def request_save(self):
+        jsonstr = mainExperiment.toJSON()
+        fileName = "savedJsons\\"+expName[0] + ".json"
+        with open(fileName, "w") as outfile:
+            outfile.write(jsonstr)
+        self.destroy()
+
 
     def vehicleInfo(self, name, id):
         self.grab_set()
@@ -136,13 +183,15 @@ class ExperimentWindow(tk.Toplevel):
             print("Vehicle already in this experiment")
             # can turn this into a popup window later
 
-    def sensorInfo(self, package, rate, vehicle):
+    def sensorInfo(self, package, rate, vehicleName, sensorName):
         self.grab_set()
         sensor = Sensor(package, rate)
-        if vehicle == "Environmental":
+        sensor.setName(sensorName)
+        if vehicleName == "Environmental":
             mainExperiment.addEnvironmentSensors(sensor)
-        elif vehicle in vehicleDict:
-            mainExperiment.addVehicleSensor(sensor, vehicleDict.get(vehicle))
+        elif vehicleName in vehicleDict:
+            print(vehicleDict.get(vehicleName))
+            mainExperiment.addVehicleSensor(sensor, vehicleDict.get(vehicleName))
 
 
     def taskInfo(self, timeStamp, message, topic, vehicle):
@@ -218,27 +267,34 @@ class AddSensorInput(tk.Toplevel):
         self.label_refreshRate.place(x=50, y=50)
 
         self.packageButton = tk.Button(self, text="Select File", command=self.select_file_pressed)
-        self.packageButton.place(x=150, y=80, width=130)
+        self.packageButton.place(x=150, y=120, width=130)
 
         self.label_rosPackage = tk.Label(self, text="ROS Package:")
-        self.label_rosPackage.place(x=50, y=80)
+        self.label_rosPackage.place(x=50, y=120)
 
         self.label_file = tk.Label(self, text="no file selected")
-        self.label_file.place(x=10, y=120)
+        self.label_file.place(x=10, y=150)
 
         self.doneButton = tk.Button(self, text="Done", command=self.done_pressed)
-        self.doneButton.place(x=20, y=150, width=260)
+        self.doneButton.place(x=20, y=180, width=260)
+
+        self.nameEntry = tk.Entry(self)
+        self.nameEntry.place(x=150, y=80, width=130)
+
+        self.label_name = tk.Label(self, text="Sensor Name:")
+        self.label_name.place(x=50, y=80)
 
         self.package = ""
 
         self.focus()
 
     def done_pressed(self):
-        rr = self.refreshRateEntry.get()
+        rr = int(self.refreshRateEntry.get())
         p = self.package
         vehicle = self.selected.get()
+        name = self.nameEntry.get()
         # Use callback function to return to main window
-        self.callback(rr, p, vehicle)
+        self.callback(p, rr, vehicle, name)
 
         # kill this window
         self.destroy()
@@ -301,17 +357,21 @@ class AddTaskInput(tk.Toplevel):
         self.doneButton = tk.Button(self, text="Done", command=self.done_pressed)
         self.doneButton.place(x=20, y=200, width=260)
 
+        self.focus()
+        self.grab_set()
+
     def done_pressed(self):
         # Use callback function to return to main window
-        timeStamp = float(self.timeStampEntry.get())
-        message = self.messageEntry.get()
-        topic = self.topicEntry.get()
-        vehicle = vehicleDict.get(self.selected.get())
+        if self.selected.get() in vehicleDict:
+            timeStamp = float(self.timeStampEntry.get())
+            message = self.messageEntry.get()
+            topic = self.topicEntry.get()
+            vehicle = vehicleDict.get(self.selected.get())
 
-        self.callback(timeStamp, message, topic, vehicle)
+            self.callback(timeStamp, message, topic, vehicle)
 
-        # kill this window
-        self.destroy()
+            # kill this window
+            self.destroy()
 
     def loadOptions(self):
         out = ["Don't Select Me"]
@@ -328,15 +388,18 @@ class MissionWindow(tk.Toplevel):
         self.title(title)
 
         # screen elements
-        bar = tk.Scrollbar(self)
-        text = tk.Text(self, height=10, width=60)
-        text.place(x=20, y=20)
-        bar.place(x=510, y=20, height=200)
-        bar.config(command=text.yview)
-        text.config(yscrollcommand=bar.set)
+        self.bar = tk.Scrollbar(self)
+        self.text = tk.Text(self, height=10, width=60)
+        self.text.place(x=20, y=20)
+        self.bar.place(x=510, y=20, height=200)
+        self.bar.config(command=self.text.yview)
+        self.text.config(yscrollcommand=self.bar.set)
+
+        self.focus()
+        self.grab_set()
 
         for s in self.loadTasks():
-            text.insert(tk.END, s)
+            self.text.insert(tk.END, s)
 
     def loadTasks(self):
         # This is wildly inefficient in terms of running time and could be simplified if we just give the vehicle object
@@ -359,6 +422,89 @@ class MissionWindow(tk.Toplevel):
         return out
 
 
+class ViewVehicleWindow(tk.Toplevel):
+    def __init__(self, *args, name, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.config(width=600, height=300)
+        title = name + "- Vehicles"
+        self.title(title)
+
+        # get options for drop down menu
+        options = self.loadOptions()
+
+        # setup for drop down menu
+        self.selected = tk.StringVar()
+        self.selected.set(options[0])
+
+        self.drop = tk.OptionMenu(self, self.selected, *options)
+        self.drop.place(x=20, y=20)
+
+        self.viewInfoButton = tk.Button(self, text="View Info", command=self.loadText)
+        self.viewInfoButton.place(x=150, y=20)
+
+        # screen elements
+        self.bar = tk.Scrollbar(self)
+        self.text = tk.Text(self, height=10, width=60)
+        self.text.place(x=20, y=70)
+        self.bar.place(x=510, y=70, height=200)
+        self.bar.config(command=self.text.yview)
+        self.text.config(yscrollcommand=self.bar.set)
+
+        self.focus()
+        self.grab_set()
+
+    def loadOptions(self):
+        out = ["Don't Select Me"]
+        for key in vehicleDict.keys():
+            out.append(key)
+        return out
+
+    def loadText(self):
+        self.text.delete('1.0', tk.END)
+        vehicleName = self.selected.get()
+        if vehicleName in vehicleDict:
+            vehicle = vehicleDict.get(vehicleName)
+            vid = vehicle.getViconID()
+            sensors = vehicle.getSensors()
+            self.text.insert(tk.END, "Name: "+vehicleName+"\n")
+            self.text.insert(tk.END, "ViconID: "+str(vid))
+            self.text.insert(tk.END, "\nSensor Info\n")
+            self.text.insert(tk.END, "Name\t\tRefresh Rate\n")
+
+            for sensor in sensors:
+                sensorString = sensor.getName() + "\t\t" + str(sensor.getRate())
+                self.text.insert(tk.END, sensorString)
+
+
+class SensorWindow(tk.Toplevel):
+    def __init__(self, *args, name, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.config(width=600, height=300)
+        title = name + "- Sensors"
+        self.title(title)
+
+        # screen elements
+        self.bar = tk.Scrollbar(self)
+        self.text = tk.Text(self, height=10, width=60)
+        self.text.place(x=20, y=20)
+        self.bar.place(x=510, y=20, height=200)
+        self.bar.config(command=self.text.yview)
+        self.text.config(yscrollcommand=self.bar.set)
+
+        self.focus()
+        self.grab_set()
+
+        for s in self.loadSensors():
+            self.text.insert(tk.END, s)
+
+    def loadSensors(self):
+        out = ["Location\t\t Name\t\t Refresh Rate\n"]
+        for row in mainExperiment.getAllSensors():
+            sensor = row[1]
+            location = row[0]
+            out.append(location + "\t\t" + sensor.getName() + "\t\t" + str(sensor.getRate()) + "\n")
+
+        return out
 
 if __name__ == '__main__':
     mw = MainWindow()
