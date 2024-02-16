@@ -14,13 +14,15 @@
 
 import roslibpy
 import time
+from main.ros.messages.MessToUGV import *
 
 client = roslibpy.Ros(host='localhost', port=9090)
 client.run()
 
 talker = roslibpy.Topic(client, '/messop/Turtle01', 'turtlebot3_messop/MESS2UGV')
 while client.is_connected:
-    talker.publish(roslibpy.Message({'Tx': 0.0, 'Ty': 0.0, 'Rz': 0.1, 'Op': 1}))
+    msg = MessToUGV_msg(0, 0, 0.1, 1)
+    talker.publish(msg.getMessage())
     print('Sending message...')
     time.sleep(1)
 

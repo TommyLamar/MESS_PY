@@ -1,4 +1,4 @@
-# The Modular Experimental Software System
+# The Modular Experimental Software System (MESS)
 # Created as part of a Major Qualifying Project at Worcester Polytechnic Institute
 # This totally isn't an RBE project
 # I dream of one day refactoring this so all the window classes will be their own file
