@@ -1,5 +1,5 @@
 import unittest
-from main.Mission import *
+from main.mess.Mission import *
 
 
 class TestCheckDuplicates(unittest.TestCase):

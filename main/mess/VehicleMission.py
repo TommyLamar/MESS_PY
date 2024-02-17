@@ -1,5 +1,5 @@
-from main.Vehicle import *
-from main.Task import *
+from main.mess.Vehicle import *
+from main.mess.Task import *
 import json
 
 

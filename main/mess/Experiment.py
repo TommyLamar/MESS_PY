@@ -1,5 +1,5 @@
-from main.ObstacleMap import *
-from main.Mission import *
+from main.mess.ObstacleMap import *
+from main.mess.Mission import *
 import json
 
 

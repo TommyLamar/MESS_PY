@@ -1,4 +1,4 @@
-from main.Sensor import *
+from main.mess.Sensor import *
 import json
 class Vehicle:
     viconID = "changeMe"

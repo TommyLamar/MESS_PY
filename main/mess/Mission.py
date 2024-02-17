@@ -1,5 +1,4 @@
-import json
-from main.VehicleMission import *
+from main.mess.VehicleMission import *
 
 
 class Mission:

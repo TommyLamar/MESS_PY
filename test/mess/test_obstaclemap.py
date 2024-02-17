@@ -1,6 +1,6 @@
 # Test Cases for the ObstacleMap Class
 import unittest
-from main.ObstacleMap import *
+from main.mess.ObstacleMap import *
 
 
 class TestSetAndGetValues(unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from main.Vehicle import *
+from main.mess.Vehicle import *
 
 
 class MyTestCase(unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from main.Task import *
+from main.mess.Task import *
 
 class TestToJson(unittest.TestCase):
     def test_something(self):
