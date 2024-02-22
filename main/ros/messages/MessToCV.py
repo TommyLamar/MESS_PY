@@ -1,7 +1,7 @@
 import roslibpy
 
 
-class MessToCV_msg:
+class MessToCV:
 
     def __init__(self, tx, ty, tz, rx, ry, rz):
         self.Tx = tx
@@ -13,5 +13,3 @@ class MessToCV_msg:
 
     def getMessage(self):
         return roslibpy.Message(self.__dict__)
-
-    
