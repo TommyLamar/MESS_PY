@@ -6,6 +6,8 @@ https://imgur.com/a/tH3ZLYP
 -------------------------------------------------------
 MESS was developed using Python 3.8
 
+TO DO: Theres a lot of packages I ended up installing and havent updated here
+
 Packages to install: \n
 pip install roslibpy
 
