@@ -81,7 +81,8 @@ class ExperimentWindow(tk.Toplevel):
     def request_log(self):
         # todo would be cool to get a progress window
         path = fd.askdirectory()
-        retrieveLogs(path, self.name, self.vehicleDict.values())
+        if path != "":
+            retrieveLogs(path, self.name, self.vehicleDict.values())
 
     def request_launch(self):
         for v in self.vehicleDict.values():

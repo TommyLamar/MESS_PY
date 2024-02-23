@@ -2,7 +2,6 @@ import os
 def saveLaunchFile(vehicleName, filePath):
     s = getLaunchString(vehicleName)
     path = os.getcwd() + filePath
-    print(path)
     with open(path, 'w') as file:
         file.write(s)
 

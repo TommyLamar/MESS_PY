@@ -7,6 +7,7 @@ def upload(host, localPath, remotePath, user="ubuntu", password="turtlebot", por
     scp = SCPClient(ssh.get_transport())
     scp.put(localPath, recursive=True, remote_path=remotePath)
     scp.close()
+    ssh.close()
 
 
 def download(host, localPath, remotePath,user="ubuntu", password="turtlebot",  port=-1):
@@ -16,6 +17,7 @@ def download(host, localPath, remotePath,user="ubuntu", password="turtlebot",  p
     scp.get(remote_path=remotePath, local_path=localPath, recursive=True)
     scp.put(localPath, recursive=True, remote_path=remotePath)
     scp.close()
+    ssh.close()
 
 
 def initClient(host, user, password, port):

@@ -8,7 +8,7 @@ class Vehicle:
     name = "vehicle"
 
     def __init__(self, ip, sensors, name="", vtype="UGV"):
-        self.ip = ip
+        self.ip = str(ip)
         self.sensors = sensors
         self.name = name
         self.vtype = vtype
@@ -38,7 +38,7 @@ class Vehicle:
         return json.dumps(self, default=lambda o: o.__dict__, indent=4)
 
     def fromJSON(self, jsonData):
-        self.ip = jsonData["viconID"]
+        self.ip = jsonData["ip"]
         self.name = jsonData["name"]
         for s in jsonData["sensors"]:
             temp = Sensor("", -1)
