@@ -1,6 +1,7 @@
 # The Modular Experimental Software System (MESS)
 # Created as part of a Major Qualifying Project at Worcester Polytechnic Institute
 # This totally isn't an RBE project
+# I also don't know if I'll get around to commenting to explain the code, good luck :)
 
 
 from main.mess.Experiment import *

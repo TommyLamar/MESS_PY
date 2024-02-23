@@ -1,5 +1,5 @@
-from typing import List, Any
-
+# so I wrote this before I realized roslibpy is for ROS 2 and not ROS 1
+# Maybe it will be useful in the future so merry Christmas if it is!
 import roslibpy
 
 

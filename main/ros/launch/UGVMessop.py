@@ -1,7 +1,7 @@
+import os
 def saveLaunchFile(vehicleName, filePath):
-    fn = vehicleName + ".launch"
     s = getLaunchString(vehicleName)
-    path = filePath+"\\"+fn
+    path = os.getcwd() + filePath
     with open(path, 'w') as file:
         file.write(s)
 
@@ -24,7 +24,6 @@ def getLaunchString(name):
                '        <param name="model" value="$(arg model)"/>\n'
                '        \n'
                '        <!-- Other -->\n'
-               '        <include file="$(find turtlebot3_bringup)/launch/turtlebot3_robot.launch"/>\n'
                '        <node pkg="messop_ugv" type="logger" name="messlogger" output="screen"/>\n'
                '        <node pkg="messop_ugv" type="messop" name="messop" output="screen"/>\n'
                '        \n'

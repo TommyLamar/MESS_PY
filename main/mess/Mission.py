@@ -19,10 +19,10 @@ class Mission:
         # removes VehicleMission vm from mission
 
         # vehicle if to remove
-        v = vm.getVehicle().getViconID()
+        v = vm.getVehicle().getIP()
 
         # Filter to keep vms that don't have the needed
-        newVms = [x for x in self.getVehicleMissions() if x.getVehicle().getViconID() != v]
+        newVms = [x for x in self.getVehicleMissions() if x.getVehicle().getIP() != v]
 
         # update and return
         self.vehicleMissions = newVms
@@ -32,11 +32,11 @@ class Mission:
         return self.vehicleMissions
 
     def checkDuplicates(self, vm):
-        id = vm.getVehicle().getViconID()
+        id = vm.getVehicle().getIP()
 
         # determine if duplicate based on the ViconID for the Vehicle associated with a VehicleMission
         for vehicleMission in self.vehicleMissions:
-            if vehicleMission.getVehicle().getViconID() == id:
+            if vehicleMission.getVehicle().getIP() == id:
                 return True
 
         return False
@@ -70,9 +70,9 @@ class Mission:
         return unsorted
 
     def addTask(self, t, v):
-        vID = v.getViconID()
+        vID = v.getIP()
         for vm in self.vehicleMissions:
-            if vID == vm.getVehicle().getViconID():
+            if vID == vm.getVehicle().getIP():
                 vm.addTask(t)
 
     def toJSON(self):

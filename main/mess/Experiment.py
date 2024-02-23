@@ -36,7 +36,7 @@ class Experiment:
 
     def addVehicleSensor(self, sensor, vehicle):
         for v in self.vehicles:
-            if v.getViconID() == vehicle.getViconID():
+            if v.getIP() == vehicle.getIP():
                 v.addSensor(sensor)
 
     def getMap(self):
