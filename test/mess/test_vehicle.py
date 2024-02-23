@@ -23,7 +23,7 @@ class MyTestCase(unittest.TestCase):
         newV.fromJSON(temp)
 
         self.assertEqual(v.getName(), newV.getName())
-        self.assertEqual(v.getViconID(), newV.getViconID())
+        self.assertEqual(v.getIP(), newV.getIP())
         self.assertEqual(v.getSensors()[0].getName(), newV.getSensors()[0].getName())
 
 

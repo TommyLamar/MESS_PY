@@ -1,7 +1,7 @@
 import tkinter as tk
 
 
-class AddSensorInput(tk.Toplevel):
+class AddSensorWindow(tk.Toplevel):
     def __init__(self, *args, vehicleDict, callback=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.callback = callback

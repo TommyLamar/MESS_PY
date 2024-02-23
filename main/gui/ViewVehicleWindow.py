@@ -47,7 +47,7 @@ class ViewVehicleWindow(tk.Toplevel):
         vehicleName = self.selected.get()
         if vehicleName in self.vd:
             vehicle = self.vd.get(vehicleName)
-            vid = vehicle.getViconID()
+            vid = vehicle.getIP()
             sensors = vehicle.getSensors()
             self.text.insert(tk.END, "Name: "+vehicleName+"\n")
             self.text.insert(tk.END, "ViconID: "+str(vid))
