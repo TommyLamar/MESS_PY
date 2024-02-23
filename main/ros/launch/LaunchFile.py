@@ -31,12 +31,21 @@ class LaunchFile:
 
         host = self.vehicle.getIP()
 
+        bufn = self.vehicle.getName() + "_bringup.launch"
+        mfn = self.vehicle.getName() + "_messop.launch"
+        buildCMD = "catkin_make"
+        bringupCMDExe = ""
+        messopCMDExe = ""
+
         if self.vehicle.getType() == "UGV":
+            # should have a way in the future to not hard code this
             user = "ubuntu"
             password = "turtlebot"
             upload(host, self.messopPath, remotePath, user=user, password=password)
             upload(host, self.bringupPath, remotePath, user=user, password=password)
             ssh.connect(host, username=user, password=password)
+            bringupCMDExe = "roslaunch messop_ugv " + bufn
+            messopCMDExe = "roslaunch messop_ugv " + mfn
         elif self.vehicle.getType() == "UAV":
             # Place holders values for user and password for now,
             # todo figure what uav user and password is and also make it not hardcoded
@@ -45,10 +54,14 @@ class LaunchFile:
             upload(host, self.messopPath, remotePath, user=user, password=password)
             upload(host, self.bringupPath, remotePath, user=user, password=password)
             ssh.connect(host, username=user, password=password)
+            bringupCMDExe = "roslaunch messop_uav " + bufn
+            messopCMDExe = "roslaunch messop_uav " + mfn
 
-        # todo write the actual ssh command
-        bringupcmd = ""
-        messopcmd = ""
-        (stdin, stdout, stderr) = ssh.exec_command(messopcmd)  # first execute messop command
+        (stdin, stdout, stderr) = ssh.exec_command(buildCMD)  # first build everything
         stdout.channel.recv_exit_status()  # blocks until finished running
-        (stdin, stdout, stderr) = ssh.exec_command(bringupcmd)  # now run bringup
+
+        (stdin, stdout, stderr) = ssh.exec_command(bringupCMDExe)  # then execute bringup command
+        stdout.channel.recv_exit_status()  # blocks until finished running
+
+        (stdin, stdout, stderr) = ssh.exec_command(messopCMDExe)  # then execute messop command
+        stdout.channel.recv_exit_status()  # blocks until finished running
