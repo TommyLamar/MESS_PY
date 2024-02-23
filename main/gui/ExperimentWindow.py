@@ -88,7 +88,7 @@ class ExperimentWindow(tk.Toplevel):
         for v in self.vehicleDict.values():
             lf = LaunchFile(v, "\\ros\\launch\\savedLaunchFiles")
             #commented out to test and until I know where o put launch files
-            #lf.execute("~/catkin_ws")
+            #lf.execute("~/catkin_ws/src")
 
     def request_save(self):
         jsonstr = self.mainExperiment.toJSON()

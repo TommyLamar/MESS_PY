@@ -2,6 +2,7 @@ import main.ros.launch.UGVBringup as ugvb
 import main.ros.launch.UGVMessop as ugvm
 import main.ros.launch.UAVBringup as uavb
 import main.ros.launch.UAVMessop as uavm
+import main.ros.launch.UGVPackage as ugvp
 from main.fileTransfer.SCPFuncs import upload
 from paramiko import *
 
@@ -11,13 +12,14 @@ class LaunchFile:
         name = vehicle.getName()
         self.vehicle = vehicle
         self.localPath = localPath
+        self.packagePath = localPath + "\\package.xml"
         self.bringupPath = localPath + '\\' + name + "_bringup.launch"
-        print(self.bringupPath)
         self.messopPath = localPath + '\\' + name + "_messop.launch"
         self.saveFiles()
 
     def saveFiles(self):
         if self.vehicle.getType() == "UGV":
+            ugvp.savePackageFile(self.packagePath)
             ugvb.saveLaunchFile(self.vehicle.getName(), self.bringupPath)
             ugvm.saveLaunchFile(self.vehicle.getName(), self.messopPath)
         elif self.vehicle.getType() == "UAV":
@@ -37,12 +39,15 @@ class LaunchFile:
         bringupCMDExe = ""
         messopCMDExe = ""
 
+        launchPath = remotePath+"/launch"
+
         if self.vehicle.getType() == "UGV":
             # should have a way in the future to not hard code this
             user = "ubuntu"
             password = "turtlebot"
-            upload(host, self.messopPath, remotePath, user=user, password=password)
-            upload(host, self.bringupPath, remotePath, user=user, password=password)
+            upload(host, self.packagePath, remotePath, user=user, password=password)
+            upload(host, self.messopPath, launchPath, user=user, password=password)
+            upload(host, self.bringupPath, launchPath, user=user, password=password)
             ssh.connect(host, username=user, password=password)
             bringupCMDExe = "roslaunch messop_ugv " + bufn
             messopCMDExe = "roslaunch messop_ugv " + mfn
@@ -51,6 +56,7 @@ class LaunchFile:
             # todo figure what uav user and password is and also make it not hardcoded
             user = ""
             password = ""
+            upload(host, self.packagePath, remotePath, user=user, password=password)
             upload(host, self.messopPath, remotePath, user=user, password=password)
             upload(host, self.bringupPath, remotePath, user=user, password=password)
             ssh.connect(host, username=user, password=password)
