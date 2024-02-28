@@ -1,16 +1,19 @@
 from paramiko import SSHClient
 from scp import SCPClient
+import sys
+import time
 
 
-def upload(host, localPath, remotePath, user="ubuntu", password="turtlebot", port=-1):
+def upload(host, localPath, remotePath, user="ubuntu", password="turtlebot", port=-1, block=False):
     ssh = initClient(host, user, password, port)
     scp = SCPClient(ssh.get_transport())
     scp.put(localPath, recursive=True, remote_path=remotePath)
     scp.close()
     ssh.close()
+    return 1
 
 
-def download(host, localPath, remotePath,user="ubuntu", password="turtlebot",  port=-1):
+def download(host, localPath, remotePath,user="ubuntu", password="turtlebot",  port=-1, block=False):
     ssh = initClient(host, user, password, port)
 
     scp = SCPClient(ssh.get_transport())

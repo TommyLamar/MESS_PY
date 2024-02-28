@@ -5,6 +5,8 @@ import main.ros.launch.UAVMessop as uavm
 import main.ros.launch.UGVPackage as ugvp
 from main.fileTransfer.SCPFuncs import upload
 from paramiko import *
+from time import sleep
+import os
 
 
 class LaunchFile:
@@ -13,24 +15,25 @@ class LaunchFile:
         self.vehicle = vehicle
         self.localPath = localPath
         self.packagePath = localPath + "\\package.xml"
-        self.bringupPath = localPath + '\\' + name + "_bringup.launch"
-        self.messopPath = localPath + '\\' + name + "_messop.launch"
+        self.bringupPath = localPath + '/' + name + "_bringup.launch"
+        self.messopPath = localPath + '/' + name + "_messop.launch"
         self.saveFiles()
 
     def saveFiles(self):
         if self.vehicle.getType() == "UGV":
-            ugvp.savePackageFile(self.packagePath)
-            ugvb.saveLaunchFile(self.vehicle.getName(), self.bringupPath)
-            ugvm.saveLaunchFile(self.vehicle.getName(), self.messopPath)
+            print(ugvb.getLaunchString(self.vehicle.getName()))
+            ugvb.saveLaunchFile(self.vehicle.getName(), '/' + self.bringupPath)
         elif self.vehicle.getType() == "UAV":
             uavb.saveLaunchFile(self.vehicle.getName(), self.bringupPath)
             uavm.saveLaunchFile(self.vehicle.getName(), self.messopPath)
 
     def execute(self, remotePath):
+        print("creating a client")
         ssh = SSHClient()
         ssh.load_system_host_keys()
         ssh.set_missing_host_key_policy(AutoAddPolicy())
 
+        print("getting Vehicle IP")
         host = self.vehicle.getIP()
 
         bufn = self.vehicle.getName() + "_bringup.launch"
@@ -39,15 +42,19 @@ class LaunchFile:
         bringupCMDExe = ""
         messopCMDExe = ""
 
-        launchPath = remotePath+"/launch"
+        launchPath = remotePath+"/messop_ugv/launch"
+
+        while not os.path.exists(self.bringupPath): # the first char is a / which messes up the exists command
+            sleep(1)
+            print("waiting for file to exist at " + self.bringupPath)
 
         if self.vehicle.getType() == "UGV":
             # should have a way in the future to not hard code this
             user = "ubuntu"
             password = "turtlebot"
-            upload(host, self.packagePath, remotePath, user=user, password=password)
-            upload(host, self.messopPath, launchPath, user=user, password=password)
-            upload(host, self.bringupPath, launchPath, user=user, password=password)
+            #upload(host, self.packagePath, remotePath, user=user, password=password)
+            #upload(host, self.messopPath, launchPath, user=user, password=password)
+            temp = upload(host, self.bringupPath, launchPath, user=user, password=password)
             ssh.connect(host, username=user, password=password)
             bringupCMDExe = "roslaunch messop_ugv " + bufn
             messopCMDExe = "roslaunch messop_ugv " + mfn
@@ -63,11 +70,6 @@ class LaunchFile:
             bringupCMDExe = "roslaunch messop_uav " + bufn
             messopCMDExe = "roslaunch messop_uav " + mfn
 
-        (stdin, stdout, stderr) = ssh.exec_command(buildCMD)  # first build everything
-        stdout.channel.recv_exit_status()  # blocks until finished running
 
-        (stdin, stdout, stderr) = ssh.exec_command(bringupCMDExe)  # then execute bringup command
-        stdout.channel.recv_exit_status()  # blocks until finished running
-
-        (stdin, stdout, stderr) = ssh.exec_command(messopCMDExe)  # then execute messop command
+        (stdin, stdout, stderr) = ssh.exec_command(bringupCMDExe)  # then execute messop command
         stdout.channel.recv_exit_status()  # blocks until finished running
