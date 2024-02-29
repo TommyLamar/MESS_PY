@@ -1,4 +1,5 @@
 import roslibpy
+import rospy
 
 
 class MessToUGV_msg:
@@ -10,4 +11,4 @@ class MessToUGV_msg:
         self.Op = op
 
     def getMessage(self):
-        return roslibpy.Message(self.__dict__)
+        return rospy.Message(self.__dict__)

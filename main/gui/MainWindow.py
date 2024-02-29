@@ -25,8 +25,7 @@ class MainWindow(tk.Tk):
         self.newExpButton = tk.Button(self, text='New Experiment', width=25, command=self.request_name)
         self.newExpButton.pack(pady=10)
 
-        self.openExpButton = tk.Button(self, text='Open Existing Experiment', width=25,
-                                       command=self.select_file_pressed)
+        self.openExpButton = tk.Button(self, text='Open Existing Experiment', width=25, command=self.select_file_pressed)
         self.openExpButton.pack(pady=10)
 
         self.exitButton = tk.Button(self, text='Exit', width=25, command=self.destroy)
