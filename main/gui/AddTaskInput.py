@@ -68,3 +68,4 @@ class AddTaskInput(tk.Toplevel):
         if len(out) > 1:
             out.pop(0)
         return out
+

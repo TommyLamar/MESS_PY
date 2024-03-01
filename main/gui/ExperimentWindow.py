@@ -7,10 +7,15 @@ from main.gui.SensorWindow import SensorWindow
 from main.gui.ViewVehicleWindow import ViewVehicleWindow
 from main.fileTransfer.RetrieveLogs import retrieveLogs
 from main.ros.launch.LaunchFile import LaunchFile
+from main.gui.AddWaypointsWindow import AddWaypointsWindow
+import main.ros.vehicles.ugv.MoveUGV as mgv
+from main.ros.messages.MessToUGV import MessToUGV_msg
 
 import tkinter as tk
 from tkinter import filedialog as fd
 
+
+wpMessages = []
 
 class ExperimentWindow(tk.Toplevel):
     def __init__(self, *args, name, exp, vehicleDict, **kwargs):
@@ -36,7 +41,7 @@ class ExperimentWindow(tk.Toplevel):
         self.addSensorButton = tk.Button(self, text="View Sensors", command=self.request_view_sensors)
         self.addSensorButton.place(x=200, y=100, width=150)
 
-        self.addTaskButton = tk.Button(self, text="Add Task", command=self.request_task)
+        self.addTaskButton = tk.Button(self, text="Add Task", command=self.request_Waypoint)
         self.addTaskButton.place(x=20, y=150, width=150)
 
         self.addCompileMission = tk.Button(self, text="Compile Mission", command=self.request_compile)
@@ -76,6 +81,7 @@ class ExperimentWindow(tk.Toplevel):
 
     def request_compile(self):
         self.grab_release()
+        wpMessages.sort()
         self.window_name4 = MissionWindow(name=self.name, tasks=self.mainExperiment.compile())
 
     def request_log(self):
@@ -97,6 +103,10 @@ class ExperimentWindow(tk.Toplevel):
         with open(filePath, "w") as outfile:
             outfile.write(jsonstr)
         self.destroy()
+
+    def request_Waypoint(self):
+        self.grab_release()
+        self.window_name7 = AddWaypointsWindow(vehicleDict=self.vehicleDict, callback=self.waypointInfo)
 
     def vehicleInfo(self, name, id):
         self.grab_set()
@@ -125,3 +135,14 @@ class ExperimentWindow(tk.Toplevel):
         self.grab_set()
         t = Task(timeStamp, message, topic, "")
         self.mainExperiment.addTask(t, vehicle)
+
+    def waypointInfo(self, vehicle, tx, ty, rx, op, time):
+        #topic = mgv.getVertexTopicString(vehicle.getName())
+        topic = ""
+        message = "MessToUGV {Tx: " + str(tx) + " Ty: " + str(ty) + "Rx: " + str(rx) + "Op: " + str(op) + "}"
+        t = Task(time, message, topic, "")
+        self.mainExperiment.addTask(t, vehicle)
+        #msg = MessToUGV_msg(tx, ty, rx, op)
+        msg = {"tx": tx, "ty": ty, "rz": rx, "op": op}
+        msgTup = (time, msg)
+        wpMessages.append(msgTup)
